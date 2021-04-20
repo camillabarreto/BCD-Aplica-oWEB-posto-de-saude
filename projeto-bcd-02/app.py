@@ -79,7 +79,7 @@ def meunavbar():
     menu = Navbar('Sistema de Vacinação')
     menu.items = [View('Inicial', 'inicio'), ]
     menu.items.append(View('Pacientes', 'buscar_paciente'))
-    menu.items.append(View('Doses', 'listar_doses'))
+    menu.items.append(View('Doses', 'buscar_doses'))
     return menu
 
 @app.route('/')
@@ -88,10 +88,10 @@ def inicio():
     print("caminho: /")
     return render_template('index.html', title='Página Inicial')
 
-@app.route('/buscar',  methods=['GET', 'POST'])
+@app.route('/buscarpaciente',  methods=['GET', 'POST'])
 def buscar_paciente():
     # procurar um paciente especifico
-    print("caminho: /buscar")
+    print("caminho: /buscarpaciente")
     form = PacienteForm()
     if form.validate_on_submit():
         CPF = request.form['CPF']
@@ -100,7 +100,7 @@ def buscar_paciente():
         print(pessoa.nome)
         return redirect(url_for('inicio'))
 
-    return render_template('busca_paciente.html', title='Buscar paciente', form=form)
+    return render_template('buscar_paciente.html', title='Buscar paciente', form=form)
 
 @app.route('/cadastrar',  methods=['GET', 'POST'])
 def cadastrar_paciente():
@@ -119,8 +119,8 @@ def cadastrar_paciente():
         return redirect(url_for('buscar_paciente'))
     return render_template('cadastro.html', title='Cadastrar paciente', form=form)
 
-@app.route('/listar', methods=['GET', 'POST'])
-def listar_doses():
+@app.route('/buscardoses', methods=['GET', 'POST'])
+def buscar_doses():
     print("caminho: /listar")
     form = DoencaForm()
     if form.validate_on_submit():
@@ -131,7 +131,7 @@ def listar_doses():
             if(int(idd) == d.idDoenca):
                 print("DOENCA : ", d.idDoenca, " VACINA : ", d.idVacina," FABRICANTE : ",d.idFabricante)
         return redirect(url_for('inicio'))
-    return render_template('busca_doses.html', title='Cadastrar paciente', form=form)
+    return render_template('buscar_doses.html', title='Cadastrar paciente', form=form)
 
 
 @app.errorhandler(404)
