@@ -4,8 +4,7 @@ from flask_nav import Nav
 from flask_nav.elements import Navbar, View, Subgroup
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy import Table, Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Table, Column, Integer, ForeignKey, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime, timedelta, date
 
@@ -27,11 +26,17 @@ from datetime import date, datetime
 app = Flask(__name__)
 app.secret_key = "SECRET_KEY"
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://camilla:bcd1234@ampto.sj.ifsc.edu.br:33006/pp02camilla'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://camilla:bcd1234@ampto.sj.ifsc.edu.br:33006/pp02camilla'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
 db = SQLAlchemy(app)
+
+# metadata = MetaData()
+# metadata.reflect(db.engine, only=['Vacina', 'Doenca'])
+# Doenca_has_Vacina = Table('Doenca_has_Vacina', metadata,
+#                   Column('idDoenca', Integer, ForeignKey('Doenca.idDoenca')),
+#                   Column('idVacina', Integer, ForeignKey('Vacina.idVacina')),
+#                   Column('idFabricante', Integer, ForeignKey('Fabricante.idFabricante')))
 
 Base = automap_base()
 Base.prepare(db.engine, reflect=True)
@@ -45,7 +50,7 @@ Agenda = Base.classes.Agenda
 # Calendario_has_Vacina = Base.classes.Calendario_has_Vacina
 Fabricante = Base.classes.Fabricante
 Vacina = Base.classes.Vacina
-# Doenca_has_Vacina = Base.relation
+# Doenca_has_Vacina = Base.classes.Doenca_has_Vacina
 Compra = Base.classes.Compra
 Doenca = Base.classes.Doenca
 
@@ -55,12 +60,12 @@ Doenca_has_Vacina = Table('Doenca_has_Vacina', DeclBase.metadata,
                   Column('idVacina', Integer, ForeignKey('Vacina.idVacina')),
                   Column('idFabricante', Integer, ForeignKey('Fabricante.idFabricante')))
 
-doenca_vacina_collection = relationship('Doenca_has_Vacina', 
-                                   secondary=Doenca_has_Vacina, 
-                                   primaryjoin='Doenca_has_Vacina.id==Doenca_has_Vacina.c.idDoenca',
-                                   secondaryjoin='Doenca_has_Vacina.id==Doenca_has_Vacina.c.idVacina',
-                                   foreign_keys='Fabricante.idFabricante',
-                                   backref='backward')
+# doenca_vacina_collection = relationship('Doenca_has_Vacina', 
+#                                    secondary=Doenca_has_Vacina, 
+#                                    primaryjoin='Doenca_has_Vacina.id==Doenca_has_Vacina.c.idDoenca',
+#                                    secondaryjoin='Doenca_has_Vacina.id==Doenca_has_Vacina.c.idVacina',
+#                                    foreign_keys='Fabricante.idFabricante',
+#                                    backref='backward')
 
 
 boostrap = Bootstrap(app)
@@ -119,11 +124,12 @@ def listar_doses():
     print("caminho: /listar")
     form = DoencaForm()
     if form.validate_on_submit():
-        idDoenca = request.form['idDoenca']
-        print("idDoenca : ", idDoenca)
-        doenca = db.session.query(Doenca_has_Vacina).filter(idDoenca == idDoenca)
-        for d in doenca:
-            print("nome : ", d.idVacina)
+        idd = request.form['idDoenca']
+        print("idd : ", idd)
+        dhv = db.session.query(Doenca_has_Vacina).all()
+        for d in dhv:
+            if(int(idd) == d.idDoenca):
+                print("DOENCA : ", d.idDoenca, " VACINA : ", d.idVacina," FABRICANTE : ",d.idFabricante)
         return redirect(url_for('inicio'))
     return render_template('busca_doses.html', title='Cadastrar paciente', form=form)
 
