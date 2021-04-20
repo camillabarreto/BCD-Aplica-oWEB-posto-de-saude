@@ -78,26 +78,26 @@ nav.init_app(app)
 def meunavbar():
     menu = Navbar('Sistema de Vacinação')
     menu.items = [View('Inicial', 'inicio'), ]
-    menu.items.append(View('Pacientes', 'buscar_paciente'))
+    # menu.items.append(View('Pacientes', 'buscar_paciente'))
+    menu.items.append(Subgroup('Pacientes', View('Buscar', 'buscar_paciente'), View('Cadastrar', 'cadastrar_paciente')))
     menu.items.append(View('Doses', 'buscar_doses'))
     return menu
 
 @app.route('/')
 def inicio():
-    # return render_template('index.html', title='Inicial')
-    print("caminho: /")
+    # print("caminho: /")
     return render_template('index.html', title='Página Inicial')
 
 @app.route('/buscarpaciente',  methods=['GET', 'POST'])
 def buscar_paciente():
     # procurar um paciente especifico
-    print("caminho: /buscarpaciente")
+    # print("caminho: /buscarpaciente")
     form = PacienteForm()
     if form.validate_on_submit():
         CPF = request.form['CPF']
-        print("cpf : ", CPF)
+        # print("cpf : ", CPF)
         pessoa = db.session.query(Pessoa).filter(Pessoa.CPF == CPF).first()
-        print(pessoa.nome)
+        # print(pessoa.nome)
         return redirect(url_for('inicio'))
 
     return render_template('buscar_paciente.html', title='Buscar paciente', form=form)
@@ -105,7 +105,7 @@ def buscar_paciente():
 @app.route('/cadastrar',  methods=['GET', 'POST'])
 def cadastrar_paciente():
     # cadastrar um novo paciente
-    print("caminho: /cadastro")
+    # print("caminho: /cadastro")
     form = CadastroForm()
     if form.validate_on_submit():
         nome = request.form['nome']
@@ -121,11 +121,11 @@ def cadastrar_paciente():
 
 @app.route('/buscardoses', methods=['GET', 'POST'])
 def buscar_doses():
-    print("caminho: /listar")
+    # print("caminho: /listar")
     form = DoencaForm()
     if form.validate_on_submit():
         idd = request.form['idDoenca']
-        print("idd : ", idd)
+        # print("idd : ", idd)
         dhv = db.session.query(Doenca_has_Vacina).all()
         for d in dhv:
             if(int(idd) == d.idDoenca):
