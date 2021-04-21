@@ -4,7 +4,8 @@
 
 ## Como executar o programa
 
-Main.class = app.py
+Abra o terminal no diretório projeto-bcd-02 e digite:
+`python3 app.py`
 
 ## Como usar a aplicação
 
@@ -16,7 +17,7 @@ A página exibirá um formulário com os dados necessários para registrar um no
 
 ### Buscar
 
-Nessa página é solicidado o CPF do paciente que deseja consultar os dados. O campo possu dica e exemplo de como fazer o preenchimento.
+Nessa página é solicidado o CPF do paciente que deseja consultar os dados. O campo possui dica e exemplo de como fazer o preenchimento.
 Veja alguns registros para utilizar.
 
 Nome   | CPF
