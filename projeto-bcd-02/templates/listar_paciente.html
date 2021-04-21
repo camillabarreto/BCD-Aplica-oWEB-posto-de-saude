@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/bootstrap-table.min.css">
+{% endblock %}
+{% block app_content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 ">
+                <h1>Caderneta de vacinação</h1>                                         <!--alterado aqui-->
+                <h2>Paciente: {{ paciente }}</h2>                                         <!--alterado aqui-->
+                <ul id="ulist" class="list-group">
+                <h3>- Vacinas aplicadas</h3>
+                <table class="aplicadas" border="3">
+                    <thead>
+                        <tr>
+                            <th>idVacina</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for registro in agenda %}                                                         <!--alterado aqui-->
+                        <tr>
+                            <td>{{registro.idVacina}}</td>
+                            <td>{{registro.data}}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <h3>- Vacinas não aplicadas</h3>
+                <table class="nao-aplicadas" border="3">
+                    <thead>
+                        <tr>
+                            <th>idVacina</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for vacina in vacinas %}                                                         <!--alterado aqui-->
+                        <tr>
+                            <td>{{vacina.idVacina}}</td>
+                            <td><a href="/aplicar?id={{ vacina.idVacina }}">Aplicar</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

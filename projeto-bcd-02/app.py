@@ -31,26 +31,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
 db = SQLAlchemy(app)
 
-# metadata = MetaData()
-# metadata.reflect(db.engine, only=['Vacina', 'Doenca'])
-# Doenca_has_Vacina = Table('Doenca_has_Vacina', metadata,
-#                   Column('idDoenca', Integer, ForeignKey('Doenca.idDoenca')),
-#                   Column('idVacina', Integer, ForeignKey('Vacina.idVacina')),
-#                   Column('idFabricante', Integer, ForeignKey('Fabricante.idFabricante')))
-
 Base = automap_base()
 Base.prepare(db.engine, reflect=True)
-
 
 Situação = Base.classes.Situação
 Posto = Base.classes.Posto
 Pessoa = Base.classes.Pessoa
 Calendario = Base.classes.Calendario
 Agenda = Base.classes.Agenda
-# Calendario_has_Vacina = Base.classes.Calendario_has_Vacina
 Fabricante = Base.classes.Fabricante
 Vacina = Base.classes.Vacina
-# Doenca_has_Vacina = Base.classes.Doenca_has_Vacina
 Compra = Base.classes.Compra
 Doenca = Base.classes.Doenca
 
@@ -59,14 +49,10 @@ Doenca_has_Vacina = Table('Doenca_has_Vacina', DeclBase.metadata,
                   Column('idDoenca', Integer, ForeignKey('Doenca.idDoenca')),
                   Column('idVacina', Integer, ForeignKey('Vacina.idVacina')),
                   Column('idFabricante', Integer, ForeignKey('Fabricante.idFabricante')))
-
-# doenca_vacina_collection = relationship('Doenca_has_Vacina', 
-#                                    secondary=Doenca_has_Vacina, 
-#                                    primaryjoin='Doenca_has_Vacina.id==Doenca_has_Vacina.c.idDoenca',
-#                                    secondaryjoin='Doenca_has_Vacina.id==Doenca_has_Vacina.c.idVacina',
-#                                    foreign_keys='Fabricante.idFabricante',
-#                                    backref='backward')
-
+Calendario_has_Vacina = Table('Calendario_has_Vacina', DeclBase.metadata,
+                  Column('idCalendario', Integer, ForeignKey('Calendario.idCalendario')),
+                  Column('idVacina', Integer, ForeignKey('Vacina.idVacina')),
+                  Column('idFabricante', Integer, ForeignKey('Fabricante.idFabricante')))
 
 boostrap = Bootstrap(app)
 fa = FontAwesome(app)
@@ -78,34 +64,63 @@ nav.init_app(app)
 def meunavbar():
     menu = Navbar('Sistema de Vacinação')
     menu.items = [View('Inicial', 'inicio'), ]
-    # menu.items.append(View('Pacientes', 'buscar_paciente'))
     menu.items.append(Subgroup('Pacientes', View('Buscar', 'buscar_paciente'), View('Cadastrar', 'cadastrar_paciente')))
     menu.items.append(View('Doses', 'buscar_doses'))
     return menu
 
 @app.route('/')
 def inicio():
-    # print("caminho: /")
     return render_template('index.html', title='Página Inicial')
 
 @app.route('/buscarpaciente',  methods=['GET', 'POST'])
 def buscar_paciente():
     # procurar um paciente especifico
-    # print("caminho: /buscarpaciente")
     form = PacienteForm()
     if form.validate_on_submit():
         CPF = request.form['CPF']
-        # print("cpf : ", CPF)
         pessoa = db.session.query(Pessoa).filter(Pessoa.CPF == CPF).first()
-        # print(pessoa.nome)
-        return redirect(url_for('inicio'))
+        session['CPF'] = pessoa.CPF
+        session['nome'] = pessoa.nome
+        return redirect(url_for('listar_paciente'))
 
     return render_template('buscar_paciente.html', title='Buscar paciente', form=form)
+
+@app.route('/paciente')
+def listar_paciente():
+    # mostrar dados de um paciente especifico
+    agenda = db.session.query(Agenda).filter(Agenda.CPF == session.get('CPF')).all()
+    chv = db.session.query(Calendario_has_Vacina).all()
+    ano = date.today().year
+    vacinas = list()
+    for c in chv:
+        calendario = db.session.query(Calendario).filter(Calendario.idCalendario == c.idCalendario).first()
+        if calendario.ano.year == ano:
+            aplicada = False
+            for a in agenda:
+                if a.idVacina == c.idVacina:
+                    aplicada = True
+                    break
+            if not aplicada: vacinas.append(c)    
+    return render_template('listar_paciente.html', title='Caderneta', agenda=agenda, paciente=session.get('nome'), vacinas = vacinas)
+
+@app.route('/aplicar')
+def aplicar_vacina():
+    idVacina = str(request.args.get('id'))
+    agenda = Agenda()
+    agenda.data = date.today()
+    agenda.idSituação = 1
+    agenda.CPF = session.get('CPF')
+    agenda.idPosto = 1
+    agenda.idVacina = idVacina
+    fabricante = db.session.query(Vacina).filter(Vacina.idVacina == idVacina).first()
+    agenda.idFabricante = fabricante.idFabricante
+    db.session.add(agenda)
+    db.session.commit()
+    return redirect(url_for('listar_paciente'))
 
 @app.route('/cadastrar',  methods=['GET', 'POST'])
 def cadastrar_paciente():
     # cadastrar um novo paciente
-    # print("caminho: /cadastro")
     form = CadastroForm()
     if form.validate_on_submit():
         nome = request.form['nome']
