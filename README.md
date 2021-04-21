@@ -24,3 +24,5 @@ Nome   | CPF
 --------- | ------
 Camilla Barreto | 11122233344
 Gabriela Barreto | 99988899988
+
+Ao acessar um paciente válido o programa direciona para a página da caderneta de vacinação do paciente. Nessa página é possível ver as vacinas que o paciente já tomou e as vacinas que precisa tomar, segundo o calendário do ano atual. Para as vacinas que ainda não foram aplicadas é possível registrar uma nova aplicação e a página é recarregada mostrando a caderneta atualizada.
